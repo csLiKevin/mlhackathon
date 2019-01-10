@@ -5,6 +5,7 @@ export class Results extends Component {
     static defaultProps() {
         return {
             people: [],
+            superFans: {},
             video: null
         };
     }
@@ -14,7 +15,8 @@ export class Results extends Component {
 
         this.videoElement = createRef();
         this.state = {
-            boundingBox: null
+            boundingBox: null,
+            superFanData: null
         };
     }
 
@@ -24,16 +26,37 @@ export class Results extends Component {
 
         const videoHeight = this.videoElement.current.clientHeight;
         const videoWidth = this.videoElement.current.clientWidth;
+        const hasSuperFanData = this.state.superFanData !== null;
+        let color = "tomato";
+
+        if (hasSuperFanData)
+            color = "springgreen";
 
         return (
             <div style={ {
-                border: "2px solid red",
+                color,
+                border: `2px solid ${color}`,
                 position: "absolute",
                 left: `${videoWidth * this.state.boundingBox.Left}px`,
                 height: `${videoHeight * this.state.boundingBox.Height}px`,
                 width: `${videoWidth * this.state.boundingBox.Width}px`,
                 top: `${videoHeight * this.state.boundingBox.Top}px`,
-            } }/>
+            } }>
+                { hasSuperFanData ? "SUPER" : undefined }
+            </div>
+        );
+    }
+
+    renderSuperFanData() {
+        if (this.state.superFanData === null)
+            return null;
+
+        return (
+            <div style={ { textAlign: "left" } }>
+                <pre>
+                    { JSON.stringify(this.state.superFanData, null, 2)}
+                </pre>
+            </div>
         );
     }
 
@@ -41,16 +64,23 @@ export class Results extends Component {
         const faceMatches = person.FaceMatches;
         const personObj = person.Person;
         const timestamp = person.Timestamp;
-        console.log(faceMatches); // TODO: Only include facematches
+
+        let superFanData = null;
+        let color = undefined;
+        if (faceMatches) {
+            const faceId = faceMatches[0].Face.FaceId;
+            superFanData = this.props.superFans[faceId];
+            color = "springgreen";
+        }
 
         return (
             <div
                 key={ index }
                 onClick={ () => {
                     this.videoElement.current.currentTime = timestamp / 1000;
-                    this.setState({ boundingBox: personObj.BoundingBox });
+                    this.setState({ boundingBox: personObj.BoundingBox, superFanData });
                 } }
-                style={ { cursor: "pointer", textAlign: "left" } }
+                style={ { color, cursor: "pointer", textAlign: "left" } }
             >
                 { timestamp }ms
             </div>
@@ -65,6 +95,7 @@ export class Results extends Component {
                 <div style={ { maxHeight: 360, overflow: "auto" } }>
                     { this.props.people.map((person, index) => this.renderTimestamps(index, person) ) }
                 </div>
+                { this.renderSuperFanData() }
             </div>
         );
     }
