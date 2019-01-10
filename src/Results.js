@@ -1,3 +1,4 @@
+import { S3 } from "aws-sdk";
 import React, {Component, createRef} from "react";
 
 
@@ -19,6 +20,13 @@ export class Results extends Component {
             superFanData: null
         };
     }
+
+    get awsConstants() {
+        return {
+            accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY,
+            secretAccessKey: process.env.REACT_APP_AWS_SECRET_KEY
+        };
+    };
 
     renderBoundingBox() {
         if (this.videoElement.current === null || !this.state.boundingBox)
@@ -51,8 +59,16 @@ export class Results extends Component {
         if (this.state.superFanData === null)
             return null;
 
+        const [Bucket, Key] = this.state.superFanData.s3FaceImagePath.S.split(/\/(.+)/);
+        const s3Client = new S3({
+            accessKeyId: this.awsConstants.accessKeyId,
+            secretAccessKey: this.awsConstants.secretAccessKey
+        });
+        const faceUrl = s3Client.getSignedUrl('getObject', { Bucket, Key });
+
         return (
             <div style={ { textAlign: "left" } }>
+                <img style={ { maxHeight: 200 } } src={ faceUrl } alt="Matched Face" />
                 <pre>
                     { JSON.stringify(this.state.superFanData, null, 2)}
                 </pre>
@@ -65,12 +81,16 @@ export class Results extends Component {
         const personObj = person.Person;
         const timestamp = person.Timestamp;
 
-        let superFanData = null;
         let color = undefined;
+        let superFanData = null;
+        let boundingBox = personObj.BoundingBox;
         if (faceMatches) {
-            const faceId = faceMatches[0].Face.FaceId;
+            const faceMatch = faceMatches[0].Face;
+            const faceId = faceMatch.FaceId;
             superFanData = this.props.superFans[faceId];
             color = "springgreen";
+            // Face bounding doesn't seem as good.
+            // boundingBox = faceMatch.BoundingBox;
         }
 
         return (
@@ -78,7 +98,7 @@ export class Results extends Component {
                 key={ index }
                 onClick={ () => {
                     this.videoElement.current.currentTime = timestamp / 1000;
-                    this.setState({ boundingBox: personObj.BoundingBox, superFanData });
+                    this.setState({ boundingBox, superFanData });
                 } }
                 style={ { color, cursor: "pointer", textAlign: "left" } }
             >
@@ -88,14 +108,17 @@ export class Results extends Component {
     }
 
     render() {
+        const height = 360;
         return (
             <div style={ { display: "flex", position: "relative" } }>
                 { this.renderBoundingBox() }
-                <video height={ 360 } ref={ this.videoElement } src={ this.props.video } style={ {} }/>
-                <div style={ { maxHeight: 360, overflow: "auto" } }>
+                <video height={ height } ref={ this.videoElement } src={ this.props.video } style={ {} }/>
+                <div style={ { maxHeight: height, overflow: "auto" } }>
                     { this.props.people.map((person, index) => this.renderTimestamps(index, person) ) }
                 </div>
-                { this.renderSuperFanData() }
+                <div style={ { maxHeight: height, overflow: "auto" } }>
+                    { this.renderSuperFanData() }
+                </div>
             </div>
         );
     }

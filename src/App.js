@@ -5,7 +5,6 @@ import React, { Component, Fragment } from 'react';
 import './App.css';
 import { Results } from "./Results";
 import { UploadButton } from "./UploadButton.js";
-import { data } from "./testData2";
 
 
 const IN_PROGRESS = "IN_PROGRESS";
@@ -57,41 +56,41 @@ class App extends Component {
     }
 
     async analyzeFaces(s3VideoObj) {
-        // const rekognition = new Rekognition({
-        //     accessKeyId: this.awsConstants.accessKeyId,
-        //     region: "us-east-1",
-        //     secretAccessKey: this.awsConstants.secretAccessKey
-        // });
-        //
-        // // Initiate the face search request.
-        // const { JobId: jobId } = await rekognition
-        //     .startFaceSearch({
-        //         CollectionId: this.awsConstants.rekognitionCollection,
-        //         Video: {
-        //             S3Object: {
-        //                 Bucket: s3VideoObj.Bucket,
-        //                 Name: s3VideoObj.Key
-        //             }
-        //         }
-        //     })
-        //     .promise();
-        //
-        // // Poll for the status of the job.
-        // let jobStatus = IN_PROGRESS;
-        // let results;
-        // do {
-        //     results = await rekognition.getFaceSearch({
-        //         JobId: jobId
-        //     }).promise();
-        //     jobStatus = results.JobStatus;
-        //     console.log(jobStatus);
-        //
-        //     // Wait one second.
-        //     await new Promise(resolve => setTimeout(resolve, 1000));
-        // } while (jobStatus === IN_PROGRESS);
+        const rekognition = new Rekognition({
+            accessKeyId: this.awsConstants.accessKeyId,
+            region: "us-east-1",
+            secretAccessKey: this.awsConstants.secretAccessKey
+        });
+
+        // Initiate the face search request.
+        const { JobId: jobId } = await rekognition
+            .startFaceSearch({
+                CollectionId: this.awsConstants.rekognitionCollection,
+                Video: {
+                    S3Object: {
+                        Bucket: s3VideoObj.Bucket,
+                        Name: s3VideoObj.Key
+                    }
+                }
+            })
+            .promise();
+
+        // Poll for the status of the job.
+        let jobStatus = IN_PROGRESS;
+        let results;
+        do {
+            results = await rekognition.getFaceSearch({
+                JobId: jobId
+            }).promise();
+            jobStatus = results.JobStatus;
+            console.log(jobStatus);
+
+            // Wait one second.
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        } while (jobStatus === IN_PROGRESS);
 
         // Grab the matched face ids.
-        const persons = data; // todo change to results.Persons;
+        const persons = results.Persons;
         const superFans = persons.reduce((accumulator, currentValue) => {
             const faceMatches = currentValue.FaceMatches;
             if (faceMatches) {
@@ -166,7 +165,7 @@ class App extends Component {
         else if (this.state.people !== null)
             contents = (
                 <Fragment>
-                    <h2>People</h2>
+                    <h2>Results</h2>
                     <Results
                         people={ this.state.people }
                         superFans={ this.state.superFans }
