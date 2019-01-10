@@ -60,6 +60,7 @@ export class UploadButton extends Component {
                 onDragLeave={ this.handleOnDragLeave }
                 onDragOver={ this.handleOnDragOver }
                 onDrop={ this.handleOnDrop }
+                size="large"
                 variant="outlined"
             >
                 <input hidden ref={ this.inputField } type='file' onChange={ this.handleOnChange }/>
