@@ -63,7 +63,7 @@ export class UploadButton extends Component {
                 variant="outlined"
             >
                 <input hidden ref={ this.inputField } type='file' onChange={ this.handleOnChange }/>
-                Drag and Drop
+                Upload Video
             </Button>
         );
     }

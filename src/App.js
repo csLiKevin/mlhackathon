@@ -14,10 +14,13 @@ class App extends Component {
     }
 
     handleUploadVideo(event) {
-        console.log(event.dataTransfer.files);
+        const videoFile = event.dataTransfer.files[0]; // Only supports one video at a time.
+
+        // Upload file to s3.
     }
 
     render() {
+        console.log(process.env.REACT_APP_REKOGNITION);
         return (
             <div className="App">
                 <header className="App-header">
