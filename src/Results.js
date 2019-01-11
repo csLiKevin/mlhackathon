@@ -85,12 +85,14 @@ export class Results extends Component {
         let superFanData = null;
         let boundingBox = personObj.BoundingBox;
         if (faceMatches) {
-            const faceMatch = faceMatches[0].Face;
-            const faceId = faceMatch.FaceId;
-            superFanData = this.props.superFans[faceId];
-            color = "springgreen";
-            // Face bounding doesn't seem as good.
-            // boundingBox = faceMatch.BoundingBox;
+            if (faceMatches[0]) {
+                const faceMatch = faceMatches[0].Face;
+                const faceId = faceMatch.FaceId;
+                superFanData = this.props.superFans[faceId];
+                color = "springgreen";
+                // Face bounding doesn't seem as good.
+                // boundingBox = faceMatch.BoundingBox;
+            }
         }
 
         return (

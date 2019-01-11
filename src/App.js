@@ -49,7 +49,10 @@ class App extends Component {
 
         const [faceIds, people] = await this.analyzeFaces(s3VideoObj);
         const superFans = (await this.scanDynamoDB(Array.from(faceIds))).reduce((accumulator, currentValue) => {
-            accumulator[currentValue.faceId.S] = currentValue;
+            // Ignore face ids not found in Dynamo.
+            if (typeof(currentValue) !== "undefined") {
+                accumulator[currentValue.faceId.S] = currentValue;
+            }
             return accumulator;
         }, {});
         this.setState({ people, superFans, analysisProgress: null });
