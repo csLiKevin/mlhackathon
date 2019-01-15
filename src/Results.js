@@ -85,7 +85,7 @@ export class Results extends Component {
         let superFanData = null;
         let boundingBox = personObj.BoundingBox;
         if (faceMatches) {
-            if (faceMatches[0]) {
+            if (faceMatches[0]) { // Not sure why faceMatches is an empty array sometimes.
                 const faceMatch = faceMatches[0].Face;
                 const faceId = faceMatch.FaceId;
                 superFanData = this.props.superFans[faceId];
